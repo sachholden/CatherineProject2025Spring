@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Catherine Project – Spring 2026 Course Selector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Base layout and typography – inspired by catherineproject.org */
+    :root {
+      --bg-page: #f9f6f0;
+      --bg-surface: #ffffff;
+      --accent: #8b4513;
+      --accent-soft: #a0522d;
+      --accent-light: #f4e8d8;
+      --accent-hover: #6b3410;
+      --border-subtle: #e8dcc8;
+      --text-main: #3d3d3d;
+      --text-muted: #7a7a7a;
+      --text-dark: #2c2c2c;
+      --chip-bg: #f5ede0;
+      --danger: #b03a2e;
+      --radius-lg: 8px;
+      --radius-md: 6px;
+      --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-subtle: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Georgia", "Times New Roman", serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 32px auto;
+      padding: 0 16px 48px;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 11px;
+      color: var(--accent-soft);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-weight: 400;
+      font-size: 36px;
+      margin: 0 0 12px;
+      color: var(--text-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      max-width: 680px;
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Shell layout: filters + results */
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 24px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-dark);
+      letter-spacing: -0.01em;
+    }
+
+    .panel-caption {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Form controls */
+    .field-group {
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #3b3834;
+      margin-bottom: 4px;
+    }
+
+    select,
+    input[type="time"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: #fbfaf8;
+      font-size: 13px;
+      color: var(--text-main);
+      font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    select:focus,
+    input[type="time"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-light);
+      background: #ffffff;
+    }
+
+    select {
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, var(--accent-soft) 50%),
+        linear-gradient(135deg, var(--accent-soft) 50%, transparent 50%);
+      background-position:
+        calc(100% - 16px) 14px,
+        calc(100% - 11px) 14px;
+      background-size: 5px 5px, 5px 5px;
+      background-repeat: no-repeat;
+    }
+
+    .converted-time-pill {
+      margin-top: 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      padding: 4px 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      background: var(--chip-bg);
+    }
+
+    .converted-time-pill strong {
+      font-size: 13px;
+      color: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    /* Availability slider */
+    .availability-block {
+      margin-top: 8px;
+      padding: 12px 14px 14px;
+      border-radius: var(--radius-md);
+      background: #fdfcfa;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .range-slider {
+      position: relative;
+      height: 32px;
+      margin-top: 8px;
+    }
+
+    .slider-track {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-radius: 999px;
+      background: #e8dcc8;
+    }
+
+    .slider-range {
+      position: absolute;
+      top: 14px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+    }
+
+    input[type="range"] {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      height: 32px;
+      appearance: none;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      pointer-events: all;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      margin-top: -7px;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      pointer-events: all;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      pointer-events: all;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      cursor: pointer;
+      margin-top: -6px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      pointer-events: all;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 0;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 0;
+    }
+
+    .availability-summary {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .availability-summary span.value {
+      font-weight: 600;
+      color: var(--accent-soft);
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 3px 10px;
+      background: var(--accent-light);
+      color: var(--accent-soft);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Day filter pills */
+    .day-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .day-pill {
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border-subtle);
+      background: #fdfcfa;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      font-weight: 500;
+    }
+
+    .day-pill:hover {
+      background: var(--accent-light);
+      border-color: var(--accent-soft);
+      color: var(--accent-soft);
+    }
+
+    .day-pill.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .day-pill.all {
+      background: var(--chip-bg);
+      color: var(--accent-soft);
+      font-weight: 600;
+      border-color: var(--accent-light);
+    }
+
+    .day-pill.all.active {
+      background: var(--accent-soft);
+      color: #ffffff;
+      border-color: var(--accent-soft);
+    }
+
+    /* Day filter pills */
+    .day-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .day-pill {
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border-subtle);
+      background: #fdfcfa;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      font-weight: 500;
+    }
+
+    .day-pill:hover {
+      background: var(--accent-light);
+      border-color: var(--accent-soft);
+      color: var(--accent-soft);
+    }
+
+    .day-pill.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .day-pill.all {
+      background: var(--chip-bg);
+      color: var(--accent-soft);
+      font-weight: 600;
+      border-color: var(--accent-light);
+    }
+
+    .day-pill.all.active {
+      background: var(--accent-soft);
+      color: #ffffff;
+      border-color: var(--accent-soft);
+    }
+
+    /* Results header */
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .results-count {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Course cards */
+    .courses {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 70vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .course-card {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      padding: 16px 18px;
+      background: #fdfcfa;
+      box-shadow: var(--shadow-subtle);
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 12px 20px;
+      align-items: start;
+      transition: box-shadow 0.2s ease, transform 0.15s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .course-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      transform: translateY(-1px);
+      border-color: var(--accent-light);
+      background: #ffffff;
+    }
+
+    @media (max-width: 760px) {
+      .course-card {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .course-main-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-dark);
+      line-height: 1.4;
+    }
+
+    .course-type {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .course-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .course-meta span {
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    .course-tags {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .course-tag {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--chip-bg);
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .course-tag.strong {
+      background: var(--accent-light);
+      color: var(--accent-soft);
+      border-color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .course-slot {
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .course-slot strong {
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .course-slot-local {
+      font-size: 12px;
+      color: var(--accent-soft);
+      margin-top: 4px;
+    }
+
+    .course-location {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .no-results {
+      font-size: 14px;
+      color: var(--text-muted);
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: #faf6f0;
+      border: 1px solid var(--border-subtle);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="eyebrow">Catherine Project · Spring 2026</div>
+      <h1>Course Selector</h1>
+      <p class="subtitle">
+        Explore Spring 2026 offerings, see meeting times in your own timezone, and quickly find courses that fit your weekly schedule.
+        All times are listed in U.S. Eastern Time.
+      </p>
+    </header>
+
+    <div class="shell">
+      <!-- FILTER / CONTROL PANEL -->
+      <aside class="panel" aria-label="Filters">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Filter and availability</div>
+          </div>
+        </div>
+
+        <!-- Course type -->
+        <div class="field-group">
+          <div class="field-label">
+            <span>Course type</span>
+          </div>
+          <select id="filterType">
+            <option value="">All course types</option>
+            <option value="intensive reading group">Intensive reading groups</option>
+            <option value="reading group">Reading groups</option>
+            <option value="subject tutorial">Subject tutorials</option>
+            <option value="Core I: Life of the Mind Seminar">Core I: Life of the Mind</option>
+            <option value="Core II: Homer Seminar">Core II: Homer</option>
+            <option value="Core III: Plato Seminar">Core III: Plato</option>
+            <option value="Core IV: Aristotle Seminar">Core IV: Aristotle</option>
+            <option value="in-person">In-person / hybrid</option>
+          </select>
+        </div>
+
+        <!-- Meeting day -->
+        <div class="field-group">
+          <div class="field-label">
+            <span>Meeting day</span>
+          </div>
+          <div class="day-pills" id="dayPills">
+            <!-- Pills will be dynamically generated -->
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="field-group">
+          <div class="field-label">
+            <span>Location</span>
+          </div>
+          <select id="filterLocation">
+            <option value="">Any</option>
+            <option value="Online">Online</option>
+            <option value="In-person">In-person / hybrid</option>
+          </select>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #e0d6c9;margin:14px 0 10px;" />
+
+        <!-- Timezone converter -->
+        <div class="field-group">
+          <div class="field-label">
+            <span>Your timezone</span>
+          </div>
+          <select id="toTz">
+            <option value="auto">Use my current timezone</option>
+            <option value="UTC">UTC</option>
+            <option value="America/New_York">Eastern Time (ET)</option>
+            <option value="America/Chicago">Central Time (CT)</option>
+            <option value="America/Denver">Mountain Time (MT)</option>
+            <option value="America/Los_Angeles">Pacific Time (PT)</option>
+            <option value="Europe/London">London (GMT/BST)</option>
+            <option value="Europe/Paris">Paris (CET/CEST)</option>
+            <option value="Europe/Berlin">Berlin (CET/CEST)</option>
+            <option value="Asia/Dubai">Dubai (GST)</option>
+            <option value="Asia/Kolkata">India (IST)</option>
+            <option value="Asia/Singapore">Singapore (SGT)</option>
+            <option value="Asia/Tokyo">Tokyo (JST)</option>
+            <option value="Australia/Sydney">Sydney (AEDT/AEST)</option>
+          </select>
+        </div>
+
+        <!-- Availability slider -->
+        <div class="field-group">
+          <div class="field-label">
+            <span>Weekly time window</span>
+          </div>
+          <div class="availability-block">
+            <div class="range-slider">
+              <div class="slider-track"></div>
+              <div class="slider-range" id="sliderRange"></div>
+              <input type="range" id="minTime" min="0" max="24" step="0.5" value="18" />
+              <input type="range" id="maxTime" min="0" max="24" step="0.5" value="22" />
+            </div>
+            <div class="availability-summary">
+              <span>
+                I am generally available between
+                <span class="value" id="minTimeLabel"></span>
+                and
+                <span class="value" id="maxTimeLabel"></span>
+              </span>
+              <span class="pill" id="tzDisplayPill"></span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RESULTS PANEL -->
+      <section class="panel" aria-label="Course list">
+        <div class="results-header">
+          <div>
+            <div class="panel-title">Spring 2026 courses</div>
+            <div class="panel-caption">
+              Based on the registration spreadsheet for Spring 2026 offerings.
+            </div>
+          </div>
+          <div>
+            <div class="results-count" id="resultsCount"></div>
+          </div>
+        </div>
+        <div class="courses" id="coursesContainer" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Full course data from the spreadsheet
+    const COURSES = [
+      { type: "intensive reading group", author: "Euripides and Aristophanes", primaryText: "Hecuba, Medea, Hippolytus, Andromache, Helen, Trojan Women, Electra, and Aristophanes: Acharnians, Clouds, Wasps, Peace, Birds, Lysistrata, Women at the Thesmophoria, Frogs", meetingDay: "Sunday", meetingTimeEt: "5:00 PM-7:00 PM ET", dates: "01/25–05/10", location: "Online" },
+      { type: "intensive reading group", author: "Hermann Hesse", primaryText: "The Glass Bead Game", meetingDay: "Sunday", meetingTimeEt: "6:30 PM-8:30 PM ET", dates: "01/25–04/12", location: "Online" },
+      { type: "intensive reading group", author: "Søren Kierkegaard", primaryText: "Fear and Trembling", meetingDay: "Sunday", meetingTimeEt: "6:30 PM-8:00 PM ET", dates: "01/25–04/12", location: "Online" },
+      { type: "intensive reading group", author: "Ovid", primaryText: "Metamorphoses", meetingDay: "Saturday", meetingTimeEt: "11:00 AM-1:00 PM ET", dates: "01/24–05/09", location: "Online" },
+      { type: "reading group", author: "Hannah Arendt", primaryText: "The Human Condition", meetingDay: "Tuesday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "01/20–04/07", location: "Online" },
+      { type: "reading group", author: "Aristotle", primaryText: "Eudemian Ethics (Books 1-3 and 7-8 only)", meetingDay: "Wednesday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "04/15–05/16", location: "Online" },
+      { type: "reading group", author: "Aristotle", primaryText: "Nicomachean Ethics", meetingDay: "Monday, Thursday", meetingTimeEt: "11:00 AM-12:30 PM ET", dates: "01/05–02/02", location: "Online" },
+      { type: "reading group", author: "Aristotle", primaryText: "On Sophistical Refutations", meetingDay: "Sunday", meetingTimeEt: "1:30 PM-3:00 PM ET", dates: "04/19–05/31", location: "Online" },
+      { type: "reading group", author: "Aristotle", primaryText: "On the Soul", meetingDay: "Sunday", meetingTimeEt: "1:30 PM-3:00 PM ET", dates: "02/08–04/12", location: "Online" },
+      { type: "reading group", author: "Aristotle", primaryText: "Politics", meetingDay: "Tuesday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "01/20–05/05", location: "Online" },
+      { type: "reading group", author: "Jane Austen", primaryText: "Pride and Prejudice", meetingDay: "Tuesday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "01/20–03/24", location: "Online" },
+      { type: "reading group", author: "Ingmar Bergman", primaryText: "8 selected films", meetingDay: "Thursday", meetingTimeEt: "9:30 PM-11:00 PM ET", dates: "04/23–06/11", location: "Online" },
+      { type: "reading group", author: "Ivan Bunin", primaryText: "Collected Stories of Ivan Bunin", meetingDay: "Wednesday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "02/04–04/22", location: "Online" },
+      { type: "reading group", author: "Edmund Burke", primaryText: "Reflections on the Revolution in France, Thomas Paine's The Rights of Man, Mary Wollstonecraft's A Vindication of the Rights of Men", meetingDay: "Tuesday", meetingTimeEt: "4:00 PM-5:30 PM ET", dates: "01/20–04/21", location: "Hybrid" },
+      { type: "reading group", author: "Miguel de Cervantes", primaryText: "Don Quixote", meetingDay: "Monday", meetingTimeEt: "9:00 PM-10:30 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "reading group", author: "Classic Latin American Short Stories", primaryText: "Selections TBD (in Spanish)", meetingDay: "Saturday", meetingTimeEt: "11:30 AM-1:00 PM ET", dates: "02/21–04/18", location: "Online" },
+      { type: "reading group", author: "Classic Yiddish Fiction", primaryText: "Sholem Aleichem's Tevye the Dairyman, Isaac Bashevis Singer's Gimpel the Fool", meetingDay: "Sunday", meetingTimeEt: "5:00 PM-6:30 PM ET", dates: "02/08–03/01", location: "Online" },
+      { type: "reading group", author: "Joseph Conrad", primaryText: "Heart of Darkness", meetingDay: "Thursday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "02/12–02/26", location: "Online" },
+      { type: "reading group", author: "Marie de France", primaryText: "Lais of Marie de France", meetingDay: "Sunday", meetingTimeEt: "11:30 AM-1:00 PM ET", dates: "01/25–04/19", location: "Online" },
+      { type: "reading group", author: "René Descartes", primaryText: "Discourse on Method and Meditations on First Philosophy with Objections and Replies", meetingDay: "Monday", meetingTimeEt: "7:30 PM-9:00 PM ET", dates: "01/26–04/06", location: "Online" },
+      { type: "reading group", author: "Charles Dickens", primaryText: "Our Mutual Friend", meetingDay: "Monday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/26–06/08", location: "Online" },
+      { type: "reading group", author: "Charles Dickens", primaryText: "Hard Times", meetingDay: "Saturday", meetingTimeEt: "6:30 PM-8:30 PM ET", dates: "01/24–02/28", location: "Online" },
+      { type: "reading group", author: "Emily Dickinson", primaryText: "Selected works", meetingDay: "Thursday", meetingTimeEt: "7:30 PM-9:00 PM ET", dates: "01/29–02/26", location: "Online" },
+      { type: "reading group", author: "Fyodor Dostoevsky", primaryText: "The Brothers Karamazov", meetingDay: "Thursday", meetingTimeEt: "12:00 PM-1:30 PM ET", dates: "01/22–04/09", location: "Online" },
+      { type: "reading group", author: "Fyodor Dostoevsky", primaryText: "Crime and Punishment", meetingDay: "Thursday", meetingTimeEt: "8:30 PM-10:00 PM ET", dates: "01/22–04/23", location: "Online" },
+      { type: "reading group", author: "Fyodor Dostoevsky", primaryText: "Demons", meetingDay: "Saturday", meetingTimeEt: "10:00 AM-11:30 AM ET", dates: "02/07–03/28", location: "Online" },
+      { type: "reading group", author: "Fyodor Dostoevsky", primaryText: "The Idiot", meetingDay: "Tuesday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "01/27–04/28", location: "Online" },
+      { type: "reading group", author: "George Eliot", primaryText: "Daniel Deronda", meetingDay: "Monday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "02/02–05/18", location: "Online" },
+      { type: "reading group", author: "Euripides", primaryText: "Herakles, Hippolytos, Alkestis", meetingDay: "Friday", meetingTimeEt: "8:30 PM-10:00 PM ET", dates: "01/23–02/06", location: "Online" },
+      { type: "reading group", author: "Bible", primaryText: "Book of Exodus", meetingDay: "Tuesday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "02/10–04/14", location: "Online" },
+      { type: "reading group", author: "E.M. Forster", primaryText: "A Passage to India", meetingDay: "Saturday", meetingTimeEt: "7:30 PM-9:30 PM ET", dates: "03/28–05/02", location: "Online" },
+      { type: "reading group", author: "Viktor E. Frankl", primaryText: "Man's Search for Meaning", meetingDay: "Wednesday", meetingTimeEt: "7:30 PM-9:30 PM ET", dates: "04/29–05/13", location: "Online" },
+      { type: "reading group", author: "William Gaddis", primaryText: "The Recognitions", meetingDay: "Thursday", meetingTimeEt: "8:30 PM-10:00 PM ET", dates: "01/22–06/18", location: "Online" },
+      { type: "reading group", author: "Vasily Grossman", primaryText: "Life and Fate", meetingDay: "Saturday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "01/31–04/04", location: "Online" },
+      { type: "reading group", author: "Herman Hesse", primaryText: "Siddhartha", meetingDay: "Saturday", meetingTimeEt: "7:30 PM-9:30 PM ET", dates: "03/07–03/21", location: "Online" },
+      { type: "reading group", author: "Thomas Hobbes", primaryText: "Leviathan", meetingDay: "Monday, Thursday", meetingTimeEt: "11:00 AM-12:30 PM ET", dates: "02/19–03/16", location: "Online" },
+      { type: "reading group", author: "David Hume", primaryText: "Dialogues Concerning Natural Religion", meetingDay: "Monday", meetingTimeEt: "3:30 PM-5:20 PM ET", dates: "01/26–03/02", location: "Online" },
+      { type: "reading group", author: "Henry James", primaryText: "The Golden Bowl", meetingDay: "Wednesday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "02/18–05/06", location: "Online" },
+      { type: "reading group", author: "William James", primaryText: "Pragmatism", meetingDay: "Wednesday", meetingTimeEt: "12:00 PM-1:30 PM ET", dates: "04/01–04/22", location: "In-person" },
+      { type: "reading group", author: "James Joyce", primaryText: "Ulysses", meetingDay: "Sunday", meetingTimeEt: "6:30 PM-8:15 PM ET", dates: "01/25–06/21", location: "Online" },
+      { type: "reading group", author: "James Joyce", primaryText: "Ulysses", meetingDay: "Monday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "01/26–05/25", location: "Online" },
+      { type: "reading group", author: "Søren Kierkegaard", primaryText: "Either/Or", meetingDay: "Monday", meetingTimeEt: "1:30 PM-3:00 PM ET", dates: "01/26–04/06", location: "Online" },
+      { type: "reading group", author: "Søren Kierkegaard", primaryText: "The Sickness Unto Death", meetingDay: "Wednesday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/21–03/04", location: "In-person" },
+      { type: "reading group", author: "Søren Kierkegaard", primaryText: "Three Discourses on Imagined Occasions", meetingDay: "Monday", meetingTimeEt: "11:00 AM-12:30 PM ET", dates: "04/20–05/11", location: "Online" },
+      { type: "reading group", author: "Jacob Klein", primaryText: "Greek Mathematical Thought and the Origin of Algebra", meetingDay: "Wednesday", meetingTimeEt: "11:00 AM-12:30 PM ET", dates: "11/13–01/14", location: "Online" },
+      { type: "reading group", author: "Medieval Welsh Traditional Stories", primaryText: "The Mabinogion", meetingDay: "Monday", meetingTimeEt: "9:30 PM-11:00 PM ET", dates: "01/26–02/16", location: "Online" },
+      { type: "reading group", author: "Niccolò Machiavelli", primaryText: "The Prince, John Locke's Second Treatise of Civil Government, Jean-Jacques Rousseau's Discourse on the Origin and Foundations of Inequality", meetingDay: "Tuesday", meetingTimeEt: "11:00 AM-1:00 PM ET", dates: "03/03–04/07", location: "Online" },
+      { type: "reading group", author: "John Stuart Mill", primaryText: "On Liberty", meetingDay: "Tuesday", meetingTimeEt: "7:30 PM-9:00 PM ET", dates: "02/10–03/10", location: "Online" },
+      { type: "reading group", author: "Thomas More", primaryText: "Utopia, Francis Bacon's New Atlantis, Samuel Butler's Erewhon", meetingDay: "Monday", meetingTimeEt: "5:30 PM-7:00 PM ET", dates: "03/09–04/20", location: "Online" },
+      { type: "reading group", author: "Friedrich Nietzsche", primaryText: "Beyond Good and Evil", meetingDay: "Monday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "02/02–05/04", location: "Online" },
+      { type: "reading group", author: "Plato", primaryText: "Philebus", meetingDay: "Wednesday", meetingTimeEt: "12:00 PM-1:30 PM ET", dates: "03/25–05/13", location: "Online" },
+      { type: "reading group", author: "Plato", primaryText: "Protagoras", meetingDay: "Saturday", meetingTimeEt: "2:00 PM-4:00 PM ET", dates: "01/24–03/07", location: "Online" },
+      { type: "reading group", author: "Plato", primaryText: "Republic", meetingDay: "Tuesday", meetingTimeEt: "11:00 AM-1:00 PM ET", dates: "01/13–02/10", location: "Online" },
+      { type: "reading group", author: "Plato", primaryText: "Timaeus, Martin Heidegger's The Question Concerning Technology", meetingDay: "Tuesday", meetingTimeEt: "8:00 PM-10:00 PM ET", dates: "03/03–04/07", location: "Online" },
+      { type: "reading group", author: "Edgar Allan Poe", primaryText: "Eight Tales of Terror", meetingDay: "Monday", meetingTimeEt: "4:00 PM-5:30 PM ET", dates: "01/25–02/16", location: "Online" },
+      { type: "reading group", author: "Jean Racine", primaryText: "Phèdre, Andromaque, and Iphigénie (in French)", meetingDay: "Saturday", meetingTimeEt: "11:00 AM-12:30 PM ET", dates: "02/07–02/28", location: "Online" },
+      { type: "reading group", author: "Jean-Jacques Rousseau", primaryText: "The Social Contract, Edmund Burke's Reflections on the Revolution in France", meetingDay: "Monday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "01/26–04/13", location: "Online" },
+      { type: "reading group", author: "Olive Schreiner", primaryText: "Dreams", meetingDay: "Monday", meetingTimeEt: "4:00 PM-5:30 PM ET", dates: "02/23–03/16", location: "Online" },
+      { type: "reading group", author: "William Shakespeare", primaryText: "The Winter's Tale, Othello, Twelfth Night", meetingDay: "Wednesday", meetingTimeEt: "6:30 PM-8:00 PM ET", dates: "01/14–02/18", location: "In-person" },
+      { type: "reading group", author: "William Shakespeare", primaryText: "Falstaff in Shakespeare: Henry IV, Part 1; Henry IV, Part 2; Merry Wives of Windsor", meetingDay: "Wednesday", meetingTimeEt: "9:00 PM-10:30 PM ET", dates: "01/21–02/25", location: "Online" },
+      { type: "reading group", author: "William Shakespeare", primaryText: "Richard II, Henry IV Part I", meetingDay: "Saturday", meetingTimeEt: "4:00 PM-5:30 PM ET", dates: "04/25–06/27", location: "Online" },
+      { type: "reading group", author: "Mary Shelley", primaryText: "Frankenstein, Percy Bysshe Shelley's Alastor, or The Spirit of Solitude; Mutability; Mont Blanc; Prometheus Unbound", meetingDay: "Thursday", meetingTimeEt: "8:00 PM-9:30 PM ET", dates: "02/19–04/23", location: "Online" },
+      { type: "reading group", author: "John Steinbeck", primaryText: "A Selection of Short Novels of Steinbeck (The Red Pony, The Moon is Down, Cannery Row)", meetingDay: "Wednesday", meetingTimeEt: "11:00 AM-12:00 PM ET", dates: "01/21–02/25", location: "Online" },
+      { type: "reading group", author: "Stendhal", primaryText: "The Red and the Black", meetingDay: "Friday", meetingTimeEt: "12:30 PM-2:00 PM ET", dates: "01/23–04/24", location: "Online" },
+      { type: "reading group", author: "Jonathan Swift", primaryText: "Gulliver's Travels", meetingDay: "Tuesday", meetingTimeEt: "1:00 PM-2:30 PM ET", dates: "01/27–02/17", location: "Online" },
+      { type: "reading group", author: "Henry David Thoreau", primaryText: "Walden", meetingDay: "Saturday", meetingTimeEt: "10:00 AM-11:30 AM ET", dates: "02/01–04/05", location: "Online" },
+      { type: "reading group", author: "Ramón María del Valle-Inclán", primaryText: "Luces de Bohemia (in Spanish)", meetingDay: "Saturday", meetingTimeEt: "8:30 AM-10:00 AM ET", dates: "02/07–02/28", location: "Online" },
+      { type: "reading group", author: "Max Weber", primaryText: "The Vocation Lectures", meetingDay: "Tuesday", meetingTimeEt: "4:00 PM-5:30 PM ET", dates: "01/20–02/10", location: "Online" },
+      { type: "reading group", author: "Ludwig Wittgenstein", primaryText: "Tractatus Logico-Philosophicus", meetingDay: "Sunday", meetingTimeEt: "9:00 AM-10:30 AM ET", dates: "02/01–03/08", location: "Online" },
+      { type: "reading group", author: "Virginia Woolf", primaryText: "Mrs. Dalloway", meetingDay: "Thursday", meetingTimeEt: "7:00 PM-8:30 PM ET", dates: "02/19–03/12", location: "Online" },
+      { type: "reading group", author: "William Wordsworth", primaryText: "The Prelude", meetingDay: "Thursday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "02/12–05/28", location: "Online" },
+      { type: "subject tutorial", author: "Advanced Ancient Greek", primaryText: "Homeric Hymn to Demeter", meetingDay: "Friday", meetingTimeEt: "10:30 AM-12:00 PM ET", dates: "02/20–04/03", location: "Online" },
+      { type: "subject tutorial", author: "Intermediate Ancient Greek", primaryText: "Plato's Meno", meetingDay: "Friday", meetingTimeEt: "12:30 PM-2:00 PM ET", dates: "01/23–05/15", location: "Online" },
+      { type: "subject tutorial", author: "Intermediate Ancient Greek", primaryText: "Gospel of Luke and Book of Acts", meetingDay: "Thursday", meetingTimeEt: "6:00 PM-7:30 PM ET", dates: "01/22–04/16", location: "In-person" },
+      { type: "subject tutorial", author: "Introductory Ancient Greek", primaryText: "Hansen & Quinn, Greek: An Intensive Course", meetingDay: "Thursday, Sunday", meetingTimeEt: "8:00 PM-9:15 PM ET", dates: "02/05–07/19", location: "Online" },
+      { type: "subject tutorial", author: "Introductory Latin", primaryText: "Keller and Russell, Learn to Read Latin", meetingDay: "Wednesday", meetingTimeEt: "3:00 PM-5:00 PM ET", dates: "01/28–04/15", location: "Online" },
+      { type: "subject tutorial", author: "Introductory Latin, Level 2", primaryText: "LLPSI Familia Romana Oerberg, Colloquia Personarum Oerberg", meetingDay: "Wednesday", meetingTimeEt: "7:30 PM-9:00 PM ET", dates: "01/21–04/08", location: "Online" },
+      { type: "subject tutorial", author: "Introductory Sanskrit", primaryText: "The Cambridge Introduction to Sanskrit, A.M. Ruppel", meetingDay: "Tuesday, Thursday", meetingTimeEt: "7:15 PM-8:30 PM ET", dates: "01/20–05/07", location: "Online" },
+      { type: "Core I: Life of the Mind Seminar", author: "Life of Mind Seminar", primaryText: "Life of Mind Seminar reading list", meetingDay: "Monday", meetingTimeEt: "6:30 PM-8:30 PM ET", dates: "01/26–04/20", location: "In-person" },
+      { type: "Core I: Life of the Mind Seminar", author: "Life of Mind Seminar", primaryText: "Life of Mind Seminar reading list", meetingDay: "Monday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core I: Life of the Mind Seminar", author: "Life of Mind Seminar", primaryText: "Life of Mind Seminar reading list", meetingDay: "Monday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core I: Life of the Mind Seminar", author: "Life of Mind Seminar", primaryText: "Life of Mind Seminar reading list", meetingDay: "Monday", meetingTimeEt: "8:30 AM-10:30 AM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core I: Life of the Mind Seminar", author: "Life of Mind Seminar", primaryText: "Life of Mind Seminar reading list", meetingDay: "Thursday", meetingTimeEt: "11:00 AM-1:00 PM ET", dates: "01/22–04/16", location: "Online" },
+      { type: "Core I: Life of the Mind Seminar", author: "Life of Mind Seminar", primaryText: "Life of Mind Seminar reading list", meetingDay: "Tuesday", meetingTimeEt: "11:00 AM-1:00 PM ET", dates: "01/20–04/14", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Monday", meetingTimeEt: "1:00 PM-3:00 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Monday", meetingTimeEt: "6:00 PM-8:00 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Monday", meetingTimeEt: "8:00 PM-10:00 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Thursday", meetingTimeEt: "3:00 PM-5:00 PM ET", dates: "01/22–04/16", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Thursday", meetingTimeEt: "7:30 PM-9:30 PM ET", dates: "02/19–05/14", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Thursday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "02/05–04/30", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Tuesday", meetingTimeEt: "6:30 PM-8:30 PM ET", dates: "01/20–04/14", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Wednesday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/21–04/15", location: "Online" },
+      { type: "Core II: Homer Seminar", author: "Homer", primaryText: "Iliad, Odyssey", meetingDay: "Wednesday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/21–04/15", location: "Online" },
+      { type: "Core III: Plato Seminar", author: "Plato", primaryText: "Republic", meetingDay: "Friday", meetingTimeEt: "4:00 PM-6:00 PM ET", dates: "01/23–04/17", location: "Online" },
+      { type: "Core III: Plato Seminar", author: "Plato", primaryText: "Republic", meetingDay: "Monday", meetingTimeEt: "11:30 AM-1:30 PM ET", dates: "01/26–04/13", location: "Online" },
+      { type: "Core III: Plato Seminar", author: "Plato", primaryText: "Republic", meetingDay: "Tuesday", meetingTimeEt: "1:00 PM-3:00 PM ET", dates: "01/20–04/14", location: "Online" },
+      { type: "Core III: Plato Seminar", author: "Plato", primaryText: "Republic", meetingDay: "Tuesday", meetingTimeEt: "8:00 PM-10:00 PM ET", dates: "01/27–04/21", location: "Online" },
+      { type: "Core IV: Aristotle Seminar", author: "Aristotle", primaryText: "On the Soul", meetingDay: "Monday", meetingTimeEt: "7:00 PM-9:00 PM ET", dates: "01/26–04/20", location: "Online" },
+      { type: "Core IV: Aristotle Seminar", author: "Aristotle", primaryText: "On the Soul", meetingDay: "Tuesday", meetingTimeEt: "8:00 PM-10:00 PM ET", dates: "01/20–04/14", location: "Online" },
+      { type: "Core IV: Aristotle Seminar", author: "Aristotle", primaryText: "On the Soul", meetingDay: "Wednesday", meetingTimeEt: "4:00 PM-6:00 PM ET", dates: "01/28–04/22", location: "Online" },
+      { type: "Core IV: Aristotle Seminar", author: "Aristotle", primaryText: "On the Soul", meetingDay: "Wednesday", meetingTimeEt: "6:30 PM-8:30 PM ET", dates: "01/21–04/15", location: "Online" }
+    ];
+
+    // Utilities
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+    function parseEtTimeRange(rangeStr) {
+      if (!rangeStr) return null;
+      const core = rangeStr.replace("ET", "").trim();
+      const [startStr, endStr] = core.split("-").map(s => s.trim());
+      return {
+        start: parseTimeToDateEt(startStr),
+        end: parseTimeToDateEt(endStr)
+      };
+    }
+
+    function parseTimeToDateEt(timeStr) {
+      const [timePart, ampm] = timeStr.split(" ");
+      const [hStr, mStr] = timePart.split(":");
+      let h = parseInt(hStr, 10);
+      const m = parseInt(mStr || "0", 10);
+      if (ampm === "PM" && h !== 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+      const d = new Date();
+      d.setHours(h, m, 0, 0);
+      return d;
+    }
+
+    function convertEtDateToLocal(date, targetTz) {
+      const tz = targetTz === "auto" ? userTimeZone : targetTz;
+      const etString = date.toLocaleString("en-US", { timeZone: "America/New_York" });
+      const etDate = new Date(etString);
+      const targetString = etDate.toLocaleString("en-US", { timeZone: tz });
+      return new Date(targetString);
+    }
+
+    function formatLocalTime(date) {
+      return date.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function format24hLabel(value) {
+      const hours = Math.floor(value);
+      const minutes = (value % 1) * 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    }
+
+    function isInPerson(location, type) {
+      const loc = (location || "").toLowerCase();
+      const t = (type || "").toLowerCase();
+      if (loc.includes("online")) return false;
+      if (loc.includes("zoom")) return false;
+      if (loc.includes("in-person") || loc.includes("hybrid")) return true;
+      if (t.includes("in-person")) return true;
+      return false;
+    }
+
+    // Populate meeting day filter pills from data
+    const daySet = new Set();
+    COURSES.forEach(c => {
+      if (c.meetingDay) {
+        c.meetingDay.split(",").forEach(d => daySet.add(d.trim()));
+      }
+    });
+
+    const dayPillsContainer = document.getElementById("dayPills");
+    const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    const selectedDays = new Set();
+
+    // Create "All" pill
+    const allPill = document.createElement("button");
+    allPill.className = "day-pill all active";
+    allPill.textContent = "All";
+    allPill.dataset.day = "all";
+    dayPillsContainer.appendChild(allPill);
+
+    // Create individual day pills
+    const dayPills = [];
+    Array.from(daySet)
+      .sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+      .forEach(day => {
+        const pill = document.createElement("button");
+        pill.className = "day-pill";
+        pill.textContent = day;
+        pill.dataset.day = day;
+        dayPillsContainer.appendChild(pill);
+        dayPills.push(pill);
+      });
+
+    // Handle pill clicks
+    dayPillsContainer.addEventListener("click", (e) => {
+      const pill = e.target.closest(".day-pill");
+      if (!pill) return;
+
+      const day = pill.dataset.day;
+
+      if (day === "all") {
+        // Toggle all
+        if (pill.classList.contains("active")) {
+          // Already all selected, do nothing (keep all selected)
+          return;
+        } else {
+          // Select all
+          selectedDays.clear();
+          pill.classList.add("active");
+          dayPills.forEach(p => p.classList.remove("active"));
+        }
+      } else {
+        // Toggle individual day
+        allPill.classList.remove("active");
+
+        if (pill.classList.contains("active")) {
+          pill.classList.remove("active");
+          selectedDays.delete(day);
+
+          // If no days selected, activate "All"
+          if (selectedDays.size === 0) {
+            allPill.classList.add("active");
+          }
+        } else {
+          pill.classList.add("active");
+          selectedDays.add(day);
+        }
+      }
+
+      renderCourses();
+    });
+
+    // Availability slider
+    const minSlider = document.getElementById("minTime");
+    const maxSlider = document.getElementById("maxTime");
+    const minLabel = document.getElementById("minTimeLabel");
+    const maxLabel = document.getElementById("maxTimeLabel");
+    const sliderRange = document.getElementById("sliderRange");
+    const tzDisplayPill = document.getElementById("tzDisplayPill");
+
+    function updateSlider() {
+      let minVal = parseFloat(minSlider.value);
+      let maxVal = parseFloat(maxSlider.value);
+      if (minVal >= maxVal) {
+        if (event && event.target === minSlider) {
+          minVal = maxVal - 0.5;
+          minSlider.value = String(minVal);
+        } else {
+          maxVal = minVal + 0.5;
+          maxSlider.value = String(maxVal);
+        }
+      }
+      const left = (minVal / 24) * 100;
+      const right = (maxVal / 24) * 100;
+      sliderRange.style.left = left + "%";
+      sliderRange.style.width = (right - left) + "%";
+      minLabel.textContent = format24hLabel(minVal);
+      maxLabel.textContent = format24hLabel(maxVal);
+
+      const toTz = document.getElementById("toTz").value;
+      tzDisplayPill.textContent = toTz === "auto" ? userTimeZone : toTz;
+
+      renderCourses();
+    }
+
+    minSlider.addEventListener("input", updateSlider);
+    maxSlider.addEventListener("input", updateSlider);
+
+    // Filters + render pipeline
+    const filterTypeEl = document.getElementById("filterType");
+    const filterLocationEl = document.getElementById("filterLocation");
+    const toTzEl = document.getElementById("toTz");
+    const coursesContainer = document.getElementById("coursesContainer");
+    const resultsCountEl = document.getElementById("resultsCount");
+
+    filterTypeEl.addEventListener("change", renderCourses);
+    filterLocationEl.addEventListener("change", renderCourses);
+    toTzEl.addEventListener("change", () => {
+      updateSlider();
+    });
+
+    function renderCourses() {
+      const typeFilter = filterTypeEl.value;
+      const locationFilter = filterLocationEl.value;
+      const tz = toTzEl.value;
+      const availMin = parseFloat(minSlider.value);
+      const availMax = parseFloat(maxSlider.value);
+
+      coursesContainer.innerHTML = "";
+
+      // First pass: filter courses and collect them with their data
+      const filteredCourses = [];
+
+      COURSES.forEach(course => {
+        // Type filter
+        let typeMatch = true;
+        if (typeFilter === "in-person") {
+          typeMatch = isInPerson(course.location, course.type);
+        } else if (typeFilter) {
+          typeMatch = course.type.toLowerCase() === typeFilter.toLowerCase();
+        }
+
+        if (!typeMatch) return;
+
+        // Day filter - check if any selected day matches
+        if (selectedDays.size > 0) {
+          const courseDays = course.meetingDay.split(",").map(d => d.trim());
+          const hasMatch = courseDays.some(day => selectedDays.has(day));
+          if (!hasMatch) return;
+        }
+
+        // Location filter
+        if (locationFilter === "Online") {
+          if (isInPerson(course.location, course.type)) return;
+        } else if (locationFilter === "In-person") {
+          if (!isInPerson(course.location, course.type)) return;
+        }
+
+        // Determine local time range
+        const etRange = parseEtTimeRange(course.meetingTimeEt);
+        let localStart = null, localEnd = null, outsideAvailability = false;
+        if (etRange) {
+          localStart = convertEtDateToLocal(etRange.start, tz);
+          localEnd = convertEtDateToLocal(etRange.end, tz);
+          const startHour = localStart.getHours() + localStart.getMinutes() / 60;
+          const endHour = localEnd.getHours() + localEnd.getMinutes() / 60;
+          outsideAvailability = startHour < availMin || endHour > availMax;
+        }
+
+        // Skip courses with any time outside availability window
+        if (outsideAvailability) return;
+
+        // Add to filtered list with ET start time for sorting
+        filteredCourses.push({
+          course,
+          localStart,
+          localEnd,
+          etStartHour: etRange ? etRange.start.getHours() + etRange.start.getMinutes() / 60 : 999
+        });
+      });
+
+      // Sort by ET start time
+      filteredCourses.sort((a, b) => a.etStartHour - b.etStartHour);
+
+      // Second pass: render sorted courses
+      filteredCourses.forEach(({ course, localStart, localEnd }) => {
+        const card = document.createElement("article");
+        card.className = "course-card";
+
+        // Left side
+        const left = document.createElement("div");
+        const typeDiv = document.createElement("div");
+        typeDiv.className = "course-type";
+        typeDiv.textContent = course.type;
+        const title = document.createElement("div");
+        title.className = "course-main-title";
+        title.textContent = course.author ? `${course.author}: ${course.primaryText}` : course.primaryText;
+
+        const meta = document.createElement("div");
+        meta.className = "course-meta";
+        const daySpan = document.createElement("span");
+        daySpan.textContent = course.meetingDay;
+        meta.appendChild(daySpan);
+
+        const tags = document.createElement("div");
+        tags.className = "course-tags";
+        const tag1 = document.createElement("span");
+        tag1.className = "course-tag";
+        tag1.textContent = course.location || "Online";
+        tags.appendChild(tag1);
+
+        left.appendChild(typeDiv);
+        left.appendChild(title);
+        left.appendChild(meta);
+        left.appendChild(tags);
+
+        // Right side
+        const right = document.createElement("div");
+        const slot = document.createElement("div");
+        slot.className = "course-slot";
+        slot.innerHTML = `<strong>${course.meetingTimeEt}</strong>`;
+
+        const slotLocal = document.createElement("div");
+        slotLocal.className = "course-slot-local";
+        if (localStart && localEnd) {
+          slotLocal.textContent = `In your timezone: ${formatLocalTime(localStart)}–${formatLocalTime(localEnd)}`;
+        } else {
+          slotLocal.textContent = "Local time conversion unavailable.";
+        }
+
+        const location = document.createElement("div");
+        location.className = "course-location";
+        location.textContent = course.dates || "";
+
+        right.appendChild(slot);
+        right.appendChild(slotLocal);
+        right.appendChild(location);
+
+        card.appendChild(left);
+        card.appendChild(right);
+
+        coursesContainer.appendChild(card);
+      });
+
+      const visibleCount = filteredCourses.length;
+
+      if (visibleCount === 0) {
+        const msg = document.createElement("div");
+        msg.className = "no-results";
+        msg.textContent = "No courses match these filters. Try widening your availability window, adjusting the meeting day, or changing the course type.";
+        coursesContainer.appendChild(msg);
+      }
+
+      resultsCountEl.textContent = visibleCount === 1
+        ? "1 course available"
+        : visibleCount + " courses available";
+    }
+
+    // Initial render
+    updateSlider();
+  </script>
+</body>
+</html>
